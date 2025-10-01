@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>AgriSetu — Agri-Chatbot</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use the consistent color palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'field-green': '#059669', // A vibrant, appealing green
+                        'sun-gold': '#FBBF24', // A bright, warm gold/orange
+                        'surface-light': '#F8FAF8', // Very subtle off-white for background
+                        'card-light': '#FFFFFF', // Pure white for cards
+                        'text-deep': '#1D4035', // Deep dark green for text
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Styles (consistent across all pages) */
+        body {
+            background-color: #F8FAF8;
+            /* surface-light */
+            color: #1D4035;
+            /* text-deep */
+            min-height: 100vh;
+        }
+
+        .header-bg {
+            /* Vibrant gradient from deep green to gold */
+            background: linear-gradient(90deg, #059669 0%, #FBBF24 100%);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.15);
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Chat-specific styles for input and log area */
+        .chat-input {
+            background-color: #F3F4F6;
+            /* light gray for input */
+            border: 1px solid #D1D5DB;
+            color: #1D4035;
+            transition: all 0.2s;
+            line-height: 1.5; /* Ensure text fits well */
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: #059669;
+            /* field-green */
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+        }
+        
+        #chatLog {
+            height: 24rem;
+            /* h-96 */
+            border-radius: 0.75rem;
+            padding: 1rem;
+            overflow-y: auto; /* Enable scrolling for chat history */
+            background-color: #F9FAFB;
+            /* very light background for log */
+            border: 1px solid #E5E7EB;
+            display: flex; /* Use flex to stack messages */
+            flex-direction: column;
+            gap: 10px; /* Space between messages */
+        }
+        
+        /* Style for messages created by chatbot.js */
+        #chatLog div {
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        /* User Message Style */
+        #chatLog div:has(strong:contains("You")) {
+            align-self: flex-end;
+            background-color: #059669; /* field-green */
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Bot Message Style */
+        #chatLog div:has(strong:contains("Bot")) {
+            align-self: flex-start;
+            background-color: #E5E7EB; /* light gray */
+            color: #1D4035; /* text-deep */
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        #chatLog strong {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+    </style>
+</head>
+
+<body class="flex flex-col items-center pb-10">
+
+    <!-- ======= Header & Navigation (Consistent across all pages) ======= -->
+    <header class="header-bg sticky top-0 z-10 p-4 md:p-6 shadow-xl w-full">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="text-white">🌱 Agri</span><span class="text-sun-gold">Setu</span>
+            </h1>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap justify-center space-x-4 md:space-x-6 mt-3 md:mt-0 text-white/90 font-medium">
+                <a href="index.html" class="hover:text-white transition-colors pb-1">Home</a>
+                <a href="crop.html" class="hover:text-white transition-colors pb-1">Crop</a>
+                <a href="disease.html" class="hover:text-white transition-colors pb-1">Disease</a>
+                <!-- Highlighted for current page -->
+                <a href="chatbot.html"
+                    class="hover:text-white transition-colors text-white border-b-2 border-sun-gold pb-1">Chatbot</a>
+                <a href="map.html" class="hover:text-white transition-colors pb-1">Buyers</a>
+                <a href="forum.html" class="hover:text-white transition-colors pb-1">Community</a>
+
+                <!-- Language Selector -->
+                <select id="languageSelect"
+                    class="bg-white/10 text-white px-2 py-1 rounded-lg text-sm border border-white/20 ml-4 hover:bg-white/20 transition-colors">
+                    <option value="en" class="text-gray-900">English</option>
+                    <option value="hi" class="text-gray-900">हिन्दी</option>
+                    <option value="te" class="text-gray-900">తెలుగు</option>
+                </select>
+            </nav>
+        </div>
+    </header>
+    <!-- ======================================================== -->
+
+
+    <main class="w-full max-w-2xl p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-gray-200 mt-10">
+        <h2 class="text-4xl font-extrabold text-field-green mb-3 text-center tracking-tight">
+            Agri-Chatbot
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-lg mx-auto">
+            Ask me anything about farming, from crop advice to weather. I'm here to help!
+        </p>
+
+        <!-- Chat Log Area -->
+        <div id="chatLog" class="mb-6">
+            <!-- Messages appear here -->
+        </div>
+
+        <!-- Input and Control Bar -->
+        <div class="flex items-end space-x-3">
+            <!-- Text Input -->
+            <textarea id="chatInput" rows="1"
+                class="flex-1 rounded-xl chat-input p-3 resize-none overflow-hidden transition-all text-base"
+                placeholder="Type your message..."></textarea>
+
+            <!-- Send Button (field-green) -->
+            <button id="sendChat"
+                class="px-5 py-3 rounded-xl text-lg font-bold bg-field-green text-white shadow-md transition-all hover:bg-green-700 h-fit">
+                Send
+            </button>
+
+            <!-- Speak Button (sun-gold) -->
+            <button id="speakBtn"
+                class="px-5 py-3 rounded-xl text-lg font-bold bg-sun-gold text-text-deep shadow-md transition-all hover:bg-yellow-500 h-fit">
+                <span id="speakBtnText">🎤 Speak</span>
+            </button>
+        </div>
+
+    </main>
+    
+    <!-- Custom Modal Placeholder (to replace alerts) -->
+    <div id="messageBox"></div>
+
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (i18n.js content) -->
+    <!-- ======================================================== -->
+    <script>
+        // Simple translations (expand for Hindi & Telugu)
+        const translations = {
+            en: { welcome: 'Welcome', recommend: 'Recommend Crop' },
+            hi: { welcome: 'स्वागत है', recommend: 'फसल सुझाएँ' },
+            te: { welcome: 'స్వాగతం', recommend: 'పంట సిఫార్సు' }
+        };
+        function t(k, lang = 'en') { return (translations[lang] && translations[lang][k]) || translations['en'][k] || k; }
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (i18n.js content) -->
+    <!-- ======================================================== -->
+
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (chatbot.js content) -->
+    <!-- ======================================================== -->
+    <script>
+        // Function to show a custom modal alert (since alerts are disallowed)
+        const showAlert = (title, message, isError = false) => {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = `
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 animate-fadeIn">
+                    <div class="bg-card-light text-text-deep p-8 rounded-lg shadow-xl border-2 ${isError ? 'border-red-500' : 'border-field-green'} animate-fadeInUp max-w-sm">
+                        <p class="text-xl font-semibold mb-4">${title}</p>
+                        <p>${message}</p>
+                        <div class="flex justify-center mt-6">
+                            <button class="bg-field-green hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold transition-colors" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const log = (who, txt) => {
+            const chatLog = document.getElementById('chatLog');
+            const el = document.createElement('div');
+            // Using strong tag for styling purposes defined in the <style> block
+            el.innerHTML = `<strong>${who}:</strong> ${txt}`;
+            chatLog.appendChild(el);
+            // Scroll to the bottom
+            chatLog.scrollTop = chatLog.scrollHeight; 
+
+            // Bot speech synthesis
+            if (who === 'Bot') window.speechSynthesis.speak(new SpeechSynthesisUtterance(txt));
+        };
+
+        document.getElementById('sendChat').addEventListener('click', async () => {
+            const inputElement = document.getElementById('chatInput');
+            const t = inputElement.value.trim();
+            if (!t) return;
+            
+            // Log user message and clear input
+            log('You', t);
+            inputElement.value = '';
+
+            try {
+                // Fetch call to the backend chatbot API (unchanged)
+                const res = await fetch('http://localhost:8000/api/chatbot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: t, lang: 'en' })
+                });
+
+                if (!res.ok) {
+                    throw new Error(`Server responded with status: ${res.status}`);
+                }
+
+                const json = await res.json();
+                
+                // Log bot's reply
+                log('Bot', json.reply || JSON.stringify(json));
+
+            } catch (error) {
+                console.error('Error fetching chatbot reply:', error);
+                log('Bot', `Sorry, I can't connect to the server right now. Error: ${error.message}`);
+            }
+        });
+
+        // Basic browser speech recognition (Web Speech API)
+        document.getElementById('speakBtn').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showAlert('Feature Not Supported', 'Speech Recognition is not supported in this browser.', true);
+                return;
+            }
+            
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const r = new SR();
+            r.lang = 'en-IN';
+            r.interimResults = false;
+            r.maxAlternatives = 1;
+            
+            const speakBtnText = document.getElementById('speakBtnText');
+            speakBtnText.innerText = '🔴 Listening...';
+            document.getElementById('speakBtn').disabled = true;
+
+            r.onresult = (e) => {
+                const t = e.results[0][0].transcript;
+                document.getElementById('chatInput').value = t;
+                document.getElementById('sendChat').click();
+            };
+
+            r.onend = () => {
+                speakBtnText.innerText = '🎤 Speak';
+                document.getElementById('speakBtn').disabled = false;
+            };
+
+            r.onerror = (e) => {
+                console.error('Speech recognition error:', e);
+                speakBtnText.innerText = '🎤 Speak';
+                document.getElementById('speakBtn').disabled = false;
+                showAlert('Speech Error', `An error occurred during speech recognition: ${e.error}`, true);
+            };
+
+            r.start();
+        });
+        
+        // Initial welcome message
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Bot', 'Hello! I am AgriSetu Chatbot. How can I assist you with your farming today?');
+        });
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (chatbot.js content) -->
+    <!-- ======================================================== -->
+</body>
+
+</html>

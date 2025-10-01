@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgriSetu — Home</title>
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Configure Tailwind to use a custom primary color (Field Green) and secondary (Sun Gold) -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'field-green': '#059669', // A vibrant, appealing green
+            'sun-gold': '#FBBF24', // A bright, warm gold/orange
+            'surface-light': '#F8FAF8', // Very subtle off-white for background
+            'card-light': '#FFFFFF', // Pure white for cards
+            'text-deep': '#1D4035', // Deep dark green for text
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
+          },
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* Global Styles (using custom Tailwind config colors) */
+    body {
+      background-color: #F8FAF8; /* surface-light */
+      color: #1D4035; /* text-deep */
+    }
+
+    .header-bg {
+      /* Vibrant gradient from deep green to gold */
+      background: linear-gradient(90deg, #059669 0%, #FBBF24 100%);
+      box-shadow: 0 4px 15px rgba(5, 150, 105, 0.15);
+    }
+
+    .card-shadow {
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .card-shadow:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(29, 64, 53, 0.15);
+    }
+
+    .feature-icon-bg {
+      /* A nice darker gradient for icons */
+      background: linear-gradient(180deg, #047857, #065F46);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Firebase Core Imports (Moved here from the inline script) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+    // Log all debug messages to the console
+    setLogLevel('debug');
+    
+    // Firebase global variables (window scope for access in main.js)
+    window.db;
+    window.auth;
+    window.userId;
+
+    // Initialize Firebase
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    if (Object.keys(firebaseConfig).length > 0) {
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.auth = getAuth(app);
+    }
+
+    // Sign in anonymously or with custom token (same logic as before)
+    window.signIn = async function() {
+        if (!window.auth) return;
+        if (typeof __initial_auth_token !== 'undefined') {
+            try {
+                await signInWithCustomToken(window.auth, __initial_auth_token);
+            } catch (error) {
+                console.error("Custom token sign-in failed:", error);
+                await signInAnonymously(window.auth);
+            }
+        } else {
+            await signInAnonymously(window.auth);
+        }
+    };
+
+    // Auth state listener (same logic as before)
+    onAuthStateChanged(window.auth, user => {
+        if (user) {
+            window.userId = user.uid;
+            console.log("User signed in with ID:", window.userId);
+            // Call loadProfile defined in main.js
+            if (typeof window.loadProfile === 'function') {
+              window.loadProfile(window.userId);
+            }
+        } else {
+            console.log("User is signed out.");
+        }
+    });
+
+    // Initial sign-in call
+    window.signIn();
+  </script>
+  
+  <div id="messageBox"></div>
+
+  <!-- ======= Header & Navigation ======= -->
+  <header class="header-bg sticky top-0 z-10 p-4 md:p-6 shadow-xl">
+    <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+      <h1 class="text-3xl font-extrabold tracking-tight">
+        <span class="text-white">🌱 Agri</span><span class="text-sun-gold">Setu</span>
+      </h1>
+
+      <!-- Navigation Links -->
+      <nav class="flex flex-wrap justify-center space-x-4 md:space-x-6 mt-3 md:mt-0 text-white/90 font-medium">
+        <a href="index.html" class="hover:text-white transition-colors text-white border-b-2 border-sun-gold pb-1">Home</a>
+        <a href="crop.html" class="hover:text-white transition-colors pb-1">Crop</a>
+        <a href="disease.html" class="hover:text-white transition-colors pb-1">Disease</a>
+        <a href="chatbot.html" class="hover:text-white transition-colors pb-1">Chatbot</a>
+        <a href="map.html" class="hover:text-white transition-colors pb-1">Buyers</a>
+        <a href="forum.html" class="hover:text-white transition-colors pb-1">Community</a>
+
+        <!-- Language Selector -->
+        <select id="languageSelect" class="bg-white/10 text-white px-2 py-1 rounded-lg text-sm border border-white/20 ml-4 hover:bg-white/20 transition-colors">
+          <option value="en" class="text-gray-900">English</option>
+          <option value="hi" class="text-gray-900">हिन्दी</option>
+          <option value="te" class="text-gray-900">తెలుగు</option>
+        </select>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4 md:p-10">
+    <div class="text-center my-8 md:my-12">
+      <h2 class="text-5xl md:text-7xl font-extrabold text-field-green tracking-tighter leading-tight">
+        Empowering India's Farmers
+      </h2>
+      <p class="mt-4 text-lg md:text-xl text-text-deep max-w-3xl mx-auto opacity-80">
+        AgriSetu is your bridge to modern farming, providing smart tools for yield optimization and market connections.
+      </p>
+    </div>
+
+    <!-- Farmer Profile -->
+    <section class="my-10 md:my-16 p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-surface-light">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h3 class="text-3xl font-bold text-text-deep flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-8 h-8 mr-3 text-sun-gold">
+            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd" />
+          </svg>
+          Farmer Profile
+        </h3>
+        <span id="profileStatus" class="mt-4 md:mt-0 text-sm font-semibold text-field-green/70 p-2 rounded-lg bg-surface-light">Loading...</span>
+      </div>
+      <p class="text-gray-600 mb-6">Complete your profile for personalized tool recommendations and market data tailored to your region.</p>
+
+      <form id="profileForm" class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <label class="block">
+            <span class="text-gray-700 font-medium">Farmer Name <span class="text-red-500">*</span></span>
+            <input id="farmerName" class="mt-1 block w-full rounded-lg p-3 border-2 border-gray-200 focus:ring-1 focus:ring-field-green focus:border-field-green transition-shadow" placeholder="e.g., Ramesh Kumar" />
+          </label>
+
+          <label class="block">
+            <span class="text-gray-700 font-medium">Village/Region <span class="text-red-500">*</span></span>
+            <input id="farmerVillage" class="mt-1 block w-full rounded-lg p-3 border-2 border-gray-200 focus:ring-1 focus:ring-field-green focus:border-field-green transition-shadow" placeholder="e.g., Aliguda, Karnataka" />
+          </label>
+
+          <label class="block">
+            <span class="text-gray-700 font-medium">Phone (optional)</span>
+            <input id="farmerPhone" type="tel" class="mt-1 block w-full rounded-lg p-3 border-2 border-gray-200 focus:ring-1 focus:ring-field-green focus:border-field-green transition-shadow" placeholder="e.g., +91 9876543210" />
+          </label>
+        </div>
+
+        <div class="pt-4">
+          <button type="button" onclick="saveProfile()" class="bg-field-green hover:bg-green-700 text-white w-full md:w-auto px-6 py-3 rounded-xl text-lg font-bold shadow-md hover:shadow-lg transition-all transform hover:scale-[1.01] duration-200">
+            Save Profile
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Key Features -->
+    <section class="my-10 md:my-16">
+      <h3 class="text-4xl font-extrabold text-center text-text-deep mb-8">Your Digital Toolkit</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Feature Card: Crop Recommender -->
+        <a href="crop.html" class="block bg-card-light rounded-xl p-6 card-shadow border border-surface-light hover:border-field-green/50 hover:shadow-card-hover group">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 5.04M12 10.5V12m0 0v-1.5m-3-4.5h6"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep group-hover:text-field-green transition-colors">Crop Recommender</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Input your soil conditions and get expert recommendations on the best crops to plant for maximum yield.</p>
+        </a>
+
+        <!-- Feature Card: Disease Detection -->
+        <a href="disease.html" class="block bg-card-light rounded-xl p-6 card-shadow border border-surface-light hover:border-field-green/50 hover:shadow-card-hover group">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1v-3.75m-9-1.5h10.5a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H4.5A2.25 2.25 0 002.25 4.5v9a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep group-hover:text-field-green transition-colors">Disease Detection</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Use your phone camera to quickly identify plant diseases and get treatment advice instantly.</p>
+        </a>
+
+        <!-- Feature Card: Agri-Chatbot -->
+        <a href="chatbot.html" class="block bg-card-light rounded-xl p-6 card-shadow border border-surface-light hover:border-field-green/50 hover:shadow-card-hover group">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.896 9.896 0 01-5.618-1.74M12 21c4.418 0 8-4.03 8-9s-3.582-9-8-9c-4.418 0-8 3.582-8 9s3.582 9 8 9z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep group-hover:text-field-green transition-colors">Agri-Chatbot</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Ask any farming question via text or voice and receive instant, accurate advice from our AI assistant.</p>
+        </a>
+
+        <!-- Feature Card: Nearby Buyers -->
+        <a href="map.html" class="block bg-card-light rounded-xl p-6 card-shadow border border-surface-light hover:border-field-green/50 hover:shadow-card-hover group">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep group-hover:text-field-green transition-colors">Nearby Buyers</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Discover and connect with potential produce buyers near your location to secure the best market price.</p>
+        </a>
+
+        <!-- Feature Card: Community Forum -->
+        <a href="forum.html" class="block bg-card-light rounded-xl p-6 card-shadow border border-surface-light hover:border-field-green/50 hover:shadow-card-hover group">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a2 2 0 01-2-2V8a2 2 0 012-2h6a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep group-hover:text-field-green transition-colors">Community Forum</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Join a vibrant community of farmers to share local tips, ask questions, and learn from collective experience.</p>
+        </a>
+
+        <!-- Placeholder Feature Card -->
+        <div class="bg-card-light rounded-xl p-6 card-shadow border border-surface-light opacity-60">
+          <div class="flex items-start space-x-4">
+            <div class="p-3 rounded-full feature-icon-bg shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sun-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <h4 class="text-xl font-bold text-text-deep">Weather & Alerts</h4>
+          </div>
+          <p class="mt-4 text-gray-600">Future feature: Real-time weather forecasts and critical alerts for your farm area.</p>
+        </div>
+        
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="my-10 md:my-16 p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-surface-light">
+      <h3 class="text-4xl font-extrabold text-center text-text-deep mb-10">How It Works</h3>
+      <div class="flex flex-col space-y-12">
+        <div class="flex flex-col md:flex-row items-center md:space-x-12">
+          <div class="w-full md:w-1/2 order-2 md:order-1">
+            <div class="flex items-center mb-4">
+              <span class="text-3xl font-extrabold text-sun-gold mr-4">01</span>
+              <h4 class="text-2xl font-semibold text-field-green">Set Up Your Profile</h4>
+            </div>
+            <p class="text-gray-700">Enter your name and village in the "Farmer Profile" section above. This enables us to give you localized advice, ensuring all recommendations are relevant to your geographical and soil conditions. Your profile is stored securely using Firebase Firestore.</p>
+          </div>
+          <div class="w-full md:w-1/2 order-1 md:order-2 mt-6 md:mt-0 flex justify-center">
+            <img src="https://placehold.co/400x250/059669/FBBF24?text=Profile+Setup" alt="Profile Setup" class="rounded-xl shadow-xl w-full max-w-sm">
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row-reverse items-center md:space-x-reverse md:space-x-12">
+          <div class="w-full md:w-1/2 order-2">
+            <div class="flex items-center mb-4">
+              <span class="text-3xl font-extrabold text-sun-gold mr-4">02</span>
+              <h4 class="text-2xl font-semibold text-field-green">Explore Smart Tools</h4>
+            </div>
+            <p class="text-gray-700">Navigate to Crop Recommender for personalized planning, Disease Detection to quickly address plant health issues, or use the Agri-Chatbot for instant answers to pressing farming questions.</p>
+          </div>
+          <div class="w-full md:w-1/2 order-1 mt-6 md:mt-0 flex justify-center">
+            <img src="https://placehold.co/400x250/059669/FBBF24?text=Smart+Tools" alt="Tools Showcase" class="rounded-xl shadow-xl w-full max-w-sm">
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center md:space-x-12">
+          <div class="w-full md:w-1/2 order-2 md:order-1">
+            <div class="flex items-center mb-4">
+              <span class="text-3xl font-extrabold text-sun-gold mr-4">03</span>
+              <h4 class="text-2xl font-semibold text-field-green">Connect & Transact</h4>
+            </div>
+            <p class="text-gray-700">View the Nearby Buyers map to find local markets offering the best prices for your harvest. Share your knowledge and seek advice on the Community Forum with other farmers in your region.</p>
+          </div>
+          <div class="w-full md:w-1/2 order-1 md:order-2 mt-6 md:mt-0 flex justify-center">
+            <img src="https://placehold.co/400x250/059669/FBBF24?text=Market+Connect" alt="Community Forum" class="rounded-xl shadow-xl w-full max-w-sm">
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <!-- Link to the external main.js -->
+  <script type="module" src="main.js"></script>
+  <!-- Link to the internationalization script -->
+  <script src="i18n.js"></script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>AgriSetu — Nearby Buyers</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use the consistent color palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'field-green': '#059669', // A vibrant, appealing green
+                        'sun-gold': '#FBBF24', // A bright, warm gold/orange
+                        'surface-light': '#F8FAF8', // Very subtle off-white for background
+                        'card-light': '#FFFFFF', // Pure white for cards
+                        'text-deep': '#1D4035', // Deep dark green for text
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Load Leaflet CSS for mapping -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* Shared Styles (consistent across all pages) */
+        body {
+            background-color: #F8FAF8;
+            /* surface-light */
+            color: #1D4035;
+            /* text-deep */
+            min-height: 100vh;
+        }
+
+        .header-bg {
+            /* Vibrant gradient from deep green to gold */
+            background: linear-gradient(90deg, #059669 0%, #FBBF24 100%);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.15);
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Map specific styles */
+        #map {
+            width: 100%;
+            /* Make it responsive */
+            min-height: 400px;
+            height: 60vh;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center pb-10">
+
+    <!-- Load Leaflet JavaScript Library -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ======= Header & Navigation (Consistent across all pages) ======= -->
+    <header class="header-bg sticky top-0 z-10 p-4 md:p-6 shadow-xl w-full">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="text-white">🌱 Agri</span><span class="text-sun-gold">Setu</span>
+            </h1>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap justify-center space-x-4 md:space-x-6 mt-3 md:mt-0 text-white/90 font-medium">
+                <a href="index.html" class="hover:text-white transition-colors pb-1">Home</a>
+                <a href="crop.html" class="hover:text-white transition-colors pb-1">Crop</a>
+                <a href="disease.html" class="hover:text-white transition-colors pb-1">Disease</a>
+                <a href="chatbot.html" class="hover:text-white transition-colors pb-1">Chatbot</a>
+                <!-- Highlighted for current page -->
+                <a href="map.html"
+                    class="hover:text-white transition-colors text-white border-b-2 border-sun-gold pb-1">Buyers</a>
+                <a href="forum.html" class="hover:text-white transition-colors pb-1">Community</a>
+
+                <!-- Language Selector -->
+                <select id="languageSelect"
+                    class="bg-white/10 text-white px-2 py-1 rounded-lg text-sm border border-white/20 ml-4 hover:bg-white/20 transition-colors">
+                    <option value="en" class="text-gray-900">English</option>
+                    <option value="hi" class="text-gray-900">हिन्दी</option>
+                    <option value="te" class="text-gray-900">తెలుగు</option>
+                </select>
+            </nav>
+        </div>
+    </header>
+    <!-- ======================================================== -->
+
+
+    <main class="w-full max-w-4xl p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-gray-200 mt-10">
+        <h2 class="text-4xl font-extrabold text-field-green mb-3 text-center tracking-tight">
+            Find Nearby Buyers
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-lg mx-auto">
+            Locate market buyers for your harvest to get the best price. We try to center the map on your current location.
+        </p>
+
+        <!-- Map Container -->
+        <div id="map" class="mb-8"></div>
+
+        <!-- Buyer Info Section (Optional: kept it simple as the core interaction is via map popups) -->
+        <div id="buyer-info-section" class="p-4 bg-surface-light rounded-xl border border-gray-200">
+            <h3 class="text-xl font-bold text-text-deep flex items-center mb-2">
+                Buyer Notes
+            </h3>
+            <p class="text-gray-700">Click on a marker on the map to see details and prices for local buyers.</p>
+        </div>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (i18n.js content - required for header) -->
+    <!-- ======================================================== -->
+    <script>
+        // Simple translations
+        const translations = {
+            en: { welcome: 'Welcome', recommend: 'Recommend Crop' },
+            hi: { welcome: 'स्वागत है', recommend: 'फसल सुझाएँ' },
+            te: { welcome: 'స్వాగతం', recommend: 'పంట సిఫార్సు' }
+        };
+        function t(k, lang = 'en') { return (translations[lang] && translations[lang][k]) || translations['en'][k] || k; }
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (i18n.js content) -->
+    <!-- ======================================================== -->
+
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (map.js content) -->
+    <!-- ======================================================== -->
+    <script>
+        // Initialize the map and set the view to a central Indian location
+        const map = L.map('map').setView([20.5937, 78.9629], 5);
+
+        // Add the standard OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+        // Demo buyers data
+        const buyers = [
+            // Locations in India
+            { name: 'Buyer A (Rice)', lat: 17.3850, lon: 78.4867, produce: 'Rice', price: 22000 }, // Hyderabad
+            { name: 'Buyer B (Maize)', lat: 13.0827, lon: 80.2707, produce: 'Maize', price: 15000 }, // Chennai
+            { name: 'Buyer C (Wheat)', lat: 19.0760, lon: 72.8777, produce: 'Wheat', price: 18000 }, // Mumbai
+            { name: 'Buyer D (Cotton)', lat: 28.7041, lon: 77.1025, produce: 'Cotton', price: 55000 }, // Delhi
+        ];
+
+        // Add markers for all buyers
+        buyers.forEach(b => {
+            L.marker([b.lat, b.lon])
+                .addTo(map)
+                .bindPopup(
+                    `<b>${b.name}</b><br>
+                    ${b.produce} - ₹${b.price / 100} per kg approx`
+                );
+        });
+
+        // Try to center to the user's current geolocation
+        map.locate({ setView: true, maxZoom: 12 });
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (map.js content) -->
+    <!-- ======================================================== -->
+</body>
+
+</html>

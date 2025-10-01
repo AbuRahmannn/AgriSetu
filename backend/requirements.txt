@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+joblib
+scikit-learn
+sqlalchemy
+aiofiles
+python-dotenv
+paho-mqtt
+Pillow
+# optional (for production training / inference)
+# xgboost
+# tensorflow
+# torch

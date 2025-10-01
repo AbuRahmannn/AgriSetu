@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>AgriSetu — Community Forum</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use the consistent color palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'field-green': '#059669', // A vibrant, appealing green
+                        'sun-gold': '#FBBF24', // A bright, warm gold/orange
+                        'surface-light': '#F8FAF8', // Very subtle off-white for background
+                        'card-light': '#FFFFFF', // Pure white for cards
+                        'text-deep': '#1D4035', // Deep dark green for text
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Styles (consistent across all pages) */
+        body {
+            background-color: #F8FAF8;
+            /* surface-light */
+            color: #1D4035;
+            /* text-deep */
+            min-height: 100vh;
+        }
+
+        .header-bg {
+            /* Vibrant gradient from deep green to gold */
+            background: linear-gradient(90deg, #059669 0%, #FBBF24 100%);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.15);
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Forum Thread Card Style (Adapted for light theme) */
+        .thread-card {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #E5E7EB; /* Light gray border */
+            background-color: #FFFFFF; /* White background */
+            transition: box-shadow 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .thread-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Input/Textarea Custom Styling for light theme */
+        .input-style {
+            background-color: #FFFFFF;
+            border: 1px solid #D1D5DB;
+            color: #1D4035;
+            transition: all 0.2s;
+        }
+
+        .input-style:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center pb-10">
+
+    <!-- ======= Header & Navigation (Consistent across all pages) ======= -->
+    <header class="header-bg sticky top-0 z-10 p-4 md:p-6 shadow-xl w-full">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="text-white">🌱 Agri</span><span class="text-sun-gold">Setu</span>
+            </h1>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap justify-center space-x-4 md:space-x-6 mt-3 md:mt-0 text-white/90 font-medium">
+                <a href="index.html" class="hover:text-white transition-colors pb-1">Home</a>
+                <a href="crop.html" class="hover:text-white transition-colors pb-1">Crop</a>
+                <a href="disease.html" class="hover:text-white transition-colors pb-1">Disease</a>
+                <a href="chatbot.html" class="hover:text-white transition-colors pb-1">Chatbot</a>
+                <a href="map.html" class="hover:text-white transition-colors pb-1">Buyers</a>
+                <!-- Highlighted for current page -->
+                <a href="forum.html"
+                    class="hover:text-white transition-colors text-white border-b-2 border-sun-gold pb-1">Community</a>
+
+                <!-- Language Selector -->
+                <select id="languageSelect"
+                    class="bg-white/10 text-white px-2 py-1 rounded-lg text-sm border border-white/20 ml-4 hover:bg-white/20 transition-colors">
+                    <option value="en" class="text-gray-900">English</option>
+                    <option value="hi" class="text-gray-900">हिन्दी</option>
+                    <option value="te" class="text-gray-900">తెలుగు</option>
+                </select>
+            </nav>
+        </div>
+    </header>
+    <!-- ======================================================== -->
+
+    <main class="w-full max-w-2xl p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-gray-200 mt-10">
+        <h2 class="text-4xl font-extrabold text-field-green mb-3 text-center tracking-tight">
+            Community Forum
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-lg mx-auto">
+            Share your knowledge, ask questions, and connect with other farmers.
+        </p>
+
+        <!-- User ID for easy sharing -->
+        <div class="mb-6 p-4 bg-surface-light rounded-lg text-sm text-center font-mono border border-gray-300">
+            <p id="userIdDisplay" class="text-text-deep font-medium">Authenticating...</p>
+        </div>
+
+        <!-- Post a New Thread -->
+        <div class="mb-8 p-6 bg-surface-light rounded-xl border border-gray-200">
+            <h3 class="text-xl font-semibold text-field-green mb-4">Post a New Topic</h3>
+            <form id="postForm" class="space-y-4">
+                <input id="title" type="text" class="w-full rounded-lg p-3 input-style"
+                    placeholder="Title of your post..." />
+                <textarea id="body" rows="4" class="w-full rounded-lg p-3 input-style resize-none"
+                    placeholder="Describe your question or topic in detail..."></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="author" type="text" class="rounded-lg p-3 input-style"
+                        placeholder="Your name (optional)" />
+                    <!-- Post Button uses field-green style -->
+                    <button type="button" onclick="postThread()"
+                        class="px-6 py-3 rounded-xl text-lg font-bold bg-field-green text-white shadow-lg transition-all hover:bg-green-700 transform hover:scale-[1.005]">
+                        Post Thread
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Threads Section -->
+        <div>
+            <h3 class="text-2xl font-bold text-text-deep mb-4">Recent Discussions</h3>
+            <div id="threads" class="space-y-4">
+                <!-- Threads will be loaded here by the script -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Placeholder for custom alerts/modals -->
+    <div id="messageBox"></div>
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (i18n.js content - required for header) -->
+    <!-- ======================================================== -->
+    <script>
+        // Simple translations
+        const translations = {
+            en: { welcome: 'Welcome', recommend: 'Recommend Crop' },
+            hi: { welcome: 'स्वागत है', recommend: 'फसल सुझाएँ' },
+            te: { welcome: 'స్వాగతం', recommend: 'పంట సిఫార్సు' }
+        };
+        function t(k, lang = 'en') { return (translations[lang] && translations[lang][k]) || translations['en'][k] || k; }
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (i18n.js content) -->
+    <!-- ======================================================== -->
+
+
+    <!-- ======================================================== -->
+    <!-- START: Inline JavaScript (forum.js content) -->
+    <!-- ======================================================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Log all debug messages to the console
+        setLogLevel('debug');
+
+        let db, auth, userId;
+
+        // Global variables provided by the Canvas environment
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Initialize Firebase App
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        // Function to show a custom modal alert (replacing window.alert/confirm)
+        const showAlert = (title, message, isError = false) => {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.innerHTML = `
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center z-50 animate-fadeIn">
+                    <div class="bg-card-light text-text-deep p-8 rounded-lg shadow-xl border-2 ${isError ? 'border-red-500' : 'border-field-green'} animate-fadeInUp max-w-sm">
+                        <p class="text-xl font-semibold mb-4">${title}</p>
+                        <p class="text-gray-700">${message}</p>
+                        <div class="flex justify-center mt-6">
+                            <button class="bg-field-green hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold transition-colors" onclick="this.parentElement.parentElement.parentElement.remove()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Sign in anonymously or with custom token
+        const signIn = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                showAlert('Authentication Error', 'Could not sign in. Please try refreshing the page.', true);
+            }
+        };
+
+        // Example hardcoded data for initial display
+        const exampleThreads = [{
+            title: "Best natural pesticide for aphids?",
+            author: "Ramesh Sharma",
+            userId: "s_148384-29938",
+            body: "I'm having a problem with aphids on my rose plants. I'd prefer a natural solution instead of chemicals. Has anyone had success with neem oil or soap spray?",
+            createdAt: new Date(Date.now() - 3600000).toLocaleString()
+        }, {
+            title: "Irrigation techniques for dry weather",
+            author: "Priya Singh",
+            userId: "p_94751-28560",
+            body: "The weather has been unusually dry this season. What are some effective irrigation techniques to conserve water while ensuring my crops get enough moisture? I'm growing maize.",
+            createdAt: new Date(Date.now() - 7200000).toLocaleString()
+        }];
+
+        // Function to render a single thread
+        const renderThread = (threadData, isFirestoreThread) => {
+            const el = document.createElement('div');
+            el.classList.add('thread-card', 'mb-4');
+            if (isFirestoreThread) {
+                el.classList.add('firestore-thread');
+            }
+            
+            // Format date for display
+            const formattedDate = threadData.createdAt ?
+                (isFirestoreThread ? new Date(threadData.createdAt.toMillis()).toLocaleString() : threadData.createdAt) :
+                'Just now';
+
+            // Use light theme classes for thread card content
+            el.innerHTML = `
+                <h4 class="text-xl font-semibold text-field-green mb-1">${threadData.title}</h4>
+                <p class="text-sm text-gray-600 mb-2">by ${threadData.author} <span class="text-xs text-gray-500">(${threadData.userId})</span> at ${formattedDate}</p>
+                <p class="text-gray-700">${threadData.body}</p>
+            `;
+            return el;
+        };
+
+        // Function to load and display threads from Firestore and examples
+        window.loadThreads = function () {
+            const threadsList = document.getElementById('threads');
+
+            // 1. Clear existing content
+            threadsList.innerHTML = '';
+
+            // 2. Add the hardcoded example threads first
+            exampleThreads.forEach(thread => {
+                threadsList.appendChild(renderThread(thread, false));
+            });
+
+            // 3. Set up the real-time listener for Firestore data
+            const threadsCol = collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads');
+            // NOTE: orderBy removed to avoid potential runtime errors, sorting done in memory if needed, but for simplicity, we rely on the listener update for display order.
+            const q = query(threadsCol); 
+            
+            // Using onSnapshot to keep the list in sync
+            onSnapshot(q, (snapshot) => {
+                // Remove existing Firestore-loaded threads (but keep examples)
+                threadsList.querySelectorAll('.firestore-thread').forEach(el => el.remove());
+                
+                // Collect new threads and sort them by createdAt (if available) locally
+                const firestoreData = [];
+                snapshot.forEach((doc) => {
+                    firestoreData.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort data by creation time locally (descending)
+                firestoreData.sort((a, b) => {
+                    if (a.createdAt && b.createdAt) {
+                        return b.createdAt.toMillis() - a.createdAt.toMillis();
+                    }
+                    return 0;
+                });
+
+                // Render the sorted Firestore data at the top of the list
+                firestoreData.forEach((thread) => {
+                    // Prepend the new thread to display latest first after examples
+                    threadsList.prepend(renderThread(thread, true));
+                });
+            });
+        };
+
+        // Function to post a new thread to Firestore
+        window.postThread = async function () {
+            const title = document.getElementById('title').value.trim();
+            const body = document.getElementById('body').value.trim();
+
+            if (title === "" || body === "") {
+                showAlert('Error', 'Title and body fields cannot be empty.', true);
+                return;
+            }
+
+            const author = document.getElementById('author').value.trim() || 'Anonymous Farmer';
+
+            try {
+                // Posts will be stored in a shared collection
+                const threadsCol = collection(db, 'artifacts', appId, 'public', 'data', 'forum_threads');
+                await addDoc(threadsCol, {
+                    title: title,
+                    body: body,
+                    author: author,
+                    userId: userId,
+                    createdAt: serverTimestamp()
+                });
+
+                // Clear input fields after successful post
+                document.getElementById('title').value = '';
+                document.getElementById('body').value = '';
+                document.getElementById('author').value = '';
+
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showAlert('Posting Failed', `Failed to post thread. Error: ${e.message}`, true);
+            }
+        };
+
+        // Auth state listener: runs whenever the user signs in or out
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById('userIdDisplay').innerText = `Your User ID: ${userId}`;
+                // Load threads only after authentication is confirmed
+                loadThreads(); 
+            } else {
+                // This state should rarely be hit since we sign in anonymously immediately, 
+                // but handles the signed-out state safely.
+                document.getElementById('userIdDisplay').innerText = `Not signed in. Community features unavailable.`;
+            }
+        });
+        
+        // Initial sign-in call
+        signIn();
+    </script>
+    <!-- ======================================================== -->
+    <!-- END: Inline JavaScript (forum.js content) -->
+    <!-- ======================================================== -->
+</body>
+
+</html>

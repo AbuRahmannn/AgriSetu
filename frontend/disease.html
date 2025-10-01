@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>AgriSetu — Disease Detection</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use a custom primary color (Field Green) and secondary (Sun Gold) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'field-green': '#059669', // A vibrant, appealing green
+                        'sun-gold': '#FBBF24', // A bright, warm gold/orange
+                        'surface-light': '#F8FAF8', // Very subtle off-white for background
+                        'card-light': '#FFFFFF', // Pure white for cards
+                        'text-deep': '#1D4035', // Deep dark green for text
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
+                        'card-hover': '0 10px 20px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                    },
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Shared Styles */
+        body {
+            background-color: #F8FAF8; /* surface-light */
+            color: #1D4035; /* text-deep */
+            min-height: 100vh;
+        }
+
+        .header-bg {
+            /* Vibrant gradient from deep green to gold */
+            background: linear-gradient(90deg, #059669 0%, #FBBF24 100%);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.15);
+        }
+
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03);
+        }
+
+        #previewImage {
+            /* Center and fit the image within the preview box */
+            display: block;
+            object-fit: contain;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #imagePreview {
+            /* Container for the image and placeholder */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col items-center pb-10">
+
+    <!-- ======= Header & Navigation (Copied from index.html) ======= -->
+    <header class="header-bg sticky top-0 z-10 p-4 md:p-6 shadow-xl w-full">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="text-white">🌱 Agri</span><span class="text-sun-gold">Setu</span>
+            </h1>
+
+            <!-- Navigation Links -->
+            <nav class="flex flex-wrap justify-center space-x-4 md:space-x-6 mt-3 md:mt-0 text-white/90 font-medium">
+                <a href="index.html" class="hover:text-white transition-colors pb-1">Home</a>
+                <a href="crop.html" class="hover:text-white transition-colors pb-1">Crop</a>
+                <a href="disease.html" class="hover:text-white transition-colors text-white border-b-2 border-sun-gold pb-1">Disease</a>
+                <a href="chatbot.html" class="hover:text-white transition-colors pb-1">Chatbot</a>
+                <a href="map.html" class="hover:text-white transition-colors pb-1">Buyers</a>
+                <a href="forum.html" class="hover:text-white transition-colors pb-1">Community</a>
+
+                <!-- Language Selector -->
+                <select id="languageSelect"
+                    class="bg-white/10 text-white px-2 py-1 rounded-lg text-sm border border-white/20 ml-4 hover:bg-white/20 transition-colors">
+                    <option value="en" class="text-gray-900">English</option>
+                    <option value="hi" class="text-gray-900">हिन्दी</option>
+                    <option value="te" class="text-gray-900">తెలుగు</option>
+                </select>
+            </nav>
+        </div>
+    </header>
+    <!-- ======================================================== -->
+
+
+    <main class="w-full max-w-2xl p-6 md:p-10 bg-card-light rounded-xl card-shadow border border-gray-200 mt-10">
+        <h2 class="text-4xl font-extrabold text-field-green mb-3 text-center tracking-tight">
+            Plant Disease Detection
+        </h2>
+        <p class="text-center text-gray-600 mb-8 max-w-lg mx-auto">
+            Upload a clear image of an affected leaf for instant, AI-powered diagnosis.
+        </p>
+
+        <div class="space-y-6">
+            <!-- Image Upload and Preview Area -->
+            <div class="relative w-full h-64 bg-surface-light border-2 border-dashed border-field-green/50 rounded-xl flex items-center justify-center p-4 overflow-hidden group hover:border-field-green transition-colors cursor-pointer">
+                <div id="imagePreview" class="w-full h-full">
+                    <!-- This image must have id="previewImage" for disease.js -->
+                    <img id="previewImage" src="#" alt="Image Preview" class="hidden">
+                    
+                    <!-- This div must have id="placeholder" for disease.js -->
+                    <div id="placeholder" class="text-gray-500 text-center flex flex-col items-center justify-center h-full group-hover:text-field-green transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 group-hover:text-field-green transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p class="mt-2 font-medium">Click or Drop Image Here</p>
+                    </div>
+                </div>
+                <!-- This input must have id="img" for disease.js -->
+                <input type="file" id="img" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+            </div>
+
+            <div class="pt-4">
+                <!-- This button must have id="send" for disease.js -->
+                <button type="button" id="send" 
+                    class="w-full px-6 py-3 rounded-xl text-xl font-bold bg-field-green text-white shadow-lg transition-all hover:bg-green-700 transform hover:scale-[1.005]">
+                    Analyze Image
+                </button>
+            </div>
+        </div>
+        
+        <!-- This div must have id="result" for disease.js -->
+        <div id="result" class="mt-8 p-6 bg-surface-light rounded-xl border-2 border-sun-gold/50 shadow-inner hidden">
+            <h3 class="text-xl font-bold text-field-green mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 mr-2 text-sun-gold">
+                    <path fill-rule="evenodd" d="M11.54 22.351A2.43 2.43 0 0 0 14.155 21l-3.37-3.37a2.53 2.53 0 0 0-3.58 0L3.845 21a2.43 2.43 0 0 0 2.615 1.351C8.257 21.673 11.085 22.5 14 22.5c2.915 0 5.743-.827 7.54-2.149a2.43 2.43 0 0 0 2.615-1.351l-3.37-3.37a2.53 2.53 0 0 0-3.58 0L11.54 22.351Z" clip-rule="evenodd" />
+                    <path d="M10.875 1.837c-1.375-.54-2.862.264-3.402 1.639l-2.922 7.417c-.54 1.375.264 2.862 1.639 3.402l7.417 2.922c1.375.54 2.862-.264 3.402-1.639l2.922-7.417c.54-1.375-.264-2.862-1.639-3.402l-7.417-2.922Z" />
+                </svg>
+                Diagnosis Result
+            </h3>
+            <div id="resultContent" class="space-y-4">
+                <!-- This p must have id="prediction" for disease.js -->
+                <p id="prediction" class="text-lg text-text-deep font-semibold">Waiting for analysis...</p>
+                
+                <!-- This pre must have id="rawData" for disease.js -->
+                <pre id="rawData" class="whitespace-pre-wrap font-mono text-gray-700 text-sm p-4 bg-white rounded-lg border border-gray-100 overflow-auto max-h-64"></pre>
+            </div>
+        </div>
+
+        <!-- Custom Modal for Alerts (must have id="messageBox" for disease.js) -->
+        <div id="messageBox"></div>
+
+    </main>
+    
+    <script src="i18n.js"></script>
+    <!-- Ensure the original JS file is loaded -->
+    <script type="module" src="disease.js"></script>
+</body>
+
+</html>
