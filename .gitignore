@@ -1,0 +1,33 @@
+# Virtual Environment
+backend/.venv/
+.venv/
+venv/
+ENV/
+
+# Python Cache
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite Database
+*.sqlite
+*.sqlite-journal
+*.sqlite3
+
+# Log files
+*.log
+*.jsonl
+
+# Uploads and temporary files
+frontend/uploads/*
+!frontend/uploads/.gitkeep
+
+# IDE Config
+.vscode/
+.idea/
+.DS_Store
+
+# Project Brief & Temporary Text Extractions
+SIH2025-AgriSetu-67048.pdf
+pdf_content.txt

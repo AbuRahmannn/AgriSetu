@@ -1,0 +1,6 @@
+ph,nitrogen,phosphorus,potassium,moisture,temperature,rainfall,crop_label
+5.2,90,40,60,10,28,200,Rice
+6.3,60,30,40,12,22,100,Wheat
+7.1,40,20,30,8,26,50,Maize
+6.0,70,35,50,11,24,120,Wheat
+5.0,110,50,70,13,29,250,Rice
