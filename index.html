@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AgriSetu — Premium Farmer advisory Platform</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Font and Icon CDNs -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="logo-section">
+        <span class="logo-icon">🌱</span>
+        <h1 class="logo-text">Agri<span>Setu</span></h1>
+      </div>
+      
+      <nav class="nav-menu">
+        <li class="nav-item active" data-tab="tab-home"><a href="#home"><span>🏠</span> Home Dashboard</a></li>
+        <li class="nav-item" data-tab="tab-crop"><a href="#crop"><span>🌾</span> Crop Advisor</a></li>
+        <li class="nav-item" data-tab="tab-disease"><a href="#disease"><span>🔍</span> Disease Detector</a></li>
+        <li class="nav-item" data-tab="tab-chatbot"><a href="#chatbot"><span>🤖</span> AI Advisory Chat</a></li>
+        <li class="nav-item" data-tab="tab-market"><a href="#market"><span>📊</span> Market & Buyers</a></li>
+        <li class="nav-item" data-tab="tab-trace"><a href="#traceability"><span>⛓️</span> Supply Chain</a></li>
+        <li class="nav-item" data-tab="tab-weather"><a href="#weather"><span>🌤️</span> Weather Updates</a></li>
+        <li class="nav-item" data-tab="tab-forum"><a href="#community"><span>👥</span> Agri Community</a></li>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="lang-selector-container">
+          <label style="font-size: 0.8rem; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem;">Language / भाषा / భాష</label>
+          <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी (Hindi)</option>
+            <option value="te">తెలుగు (Telugu)</option>
+          </select>
+        </div>
+        <div class="status-indicator">
+          <span class="status-dot active"></span>
+          <span>Online / Live Sync</span>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Dashboard Content -->
+    <main class="main-content">
+      
+      <!-- Top Dashboard Header -->
+      <header class="header-dashboard">
+        <div>
+          <h2 style="font-size: 1.75rem; font-weight: 800;" id="dashboardTitle">Welcome Back</h2>
+          <p style="color: var(--color-text-muted); font-size: 0.9rem;" id="dashboardSubtitle">AgriSetu Smart Advisory Hub • June 2026</p>
+        </div>
+        <div class="user-badge">
+          <span class="badge-dot"></span>
+          <span id="profileStatus" style="font-weight: 600; font-size: 0.9rem;">Farmer Profile: Loading...</span>
+        </div>
+      </header>
+      
+      <!-- ==================== TAB: HOME DASHBOARD ==================== -->
+      <section id="tab-home" class="tab-content active-tab">
+        <div class="grid-2">
+          
+          <!-- Farmer Profile Settings -->
+          <div class="glass-card">
+            <h3 class="card-title">👤 Farmer Profile Settings</h3>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+              Set your location and name to customize soil forecasts, market routes, and disease treatments.
+            </p>
+            <form id="profileForm" onsubmit="event.preventDefault();">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="farmerName">Farmer Name</label>
+                  <input type="text" id="farmerName" class="form-control" placeholder="e.g. Ramesh Kumar">
+                </div>
+                <div class="form-group">
+                  <label for="farmerVillage">Village / District</label>
+                  <input type="text" id="farmerVillage" class="form-control" placeholder="e.g. Amritsar, Punjab">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="farmerPhone">Phone Number (SMS Alert ready)</label>
+                <input type="tel" id="farmerPhone" class="form-control" placeholder="e.g. +91 98765 43210">
+              </div>
+              <button type="button" id="saveProfile" class="btn-primary" style="width: 100%;">Save & Initialize Sync</button>
+            </form>
+          </div>
+          
+          <!-- Real-Time IoT Sensor Nodes -->
+          <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); margin-bottom: 0;">📡 Live IoT Field Telemetry</h3>
+              <button type="button" id="toggleIoTSim" class="btn-accent" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 0.5rem;">Simulate Sensor</button>
+            </div>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+              Mock sensor nodes connected to crop fields. Displays real-time soil telemetry logs.
+            </p>
+            
+            <div class="telemetry-grid">
+              <div class="telemetry-card">
+                <div class="telemetry-value" id="iotMoisture">68.0%</div>
+                <div class="telemetry-label">Soil Moisture</div>
+              </div>
+              <div class="telemetry-card">
+                <div class="telemetry-value" id="iotTemp">26.5°C</div>
+                <div class="telemetry-label">Temperature</div>
+              </div>
+              <div class="telemetry-card">
+                <div class="telemetry-value" id="iotPH">6.4</div>
+                <div class="telemetry-label">Soil pH</div>
+              </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--color-text-muted);">NPK Soil Ratios (mg/kg)</h4>
+              <div class="telemetry-grid">
+                <div class="telemetry-card" style="padding: 0.5rem;">
+                  <div style="font-weight: 800; color: #34a853;" id="iotN">84</div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);">Nitrogen (N)</div>
+                </div>
+                <div class="telemetry-card" style="padding: 0.5rem;">
+                  <div style="font-weight: 800; color: #4285f4;" id="iotP">46</div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);">Phosphorus (P)</div>
+                </div>
+                <div class="telemetry-card" style="padding: 0.5rem;">
+                  <div style="font-weight: 800; color: #ea4335;" id="iotK">42</div>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted);">Potassium (K)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Live Graph Feed -->
+        <div class="glass-card">
+          <h3 class="card-title">📈 24-Hour Telemetry Graphs</h3>
+          <div style="height: 250px; position: relative;">
+            <canvas id="telemetryChart"></canvas>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: CROP ADVISORY ==================== -->
+      <section id="tab-crop" class="tab-content">
+        <div class="grid-1-2">
+          
+          <!-- Soil Input Parameters -->
+          <div class="glass-card">
+            <h3 class="card-title">🧪 Soil Parameters</h3>
+            <p style="color: var(--color-text-muted); margin-bottom: 1.25rem; font-size: 0.9rem;">
+              Enter your soil test values or pull parameters from active IoT telemetry nodes.
+            </p>
+            <button type="button" id="autofillSoil" class="btn-accent" style="width: 100%; margin-bottom: 1.5rem; font-size: 0.85rem;">🔌 Pull Live IoT Sensor Data</button>
+            
+            <form id="cropForm" onsubmit="event.preventDefault();">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="ph">Soil pH Level</label>
+                  <input type="number" step="0.1" id="ph" class="form-control" value="6.2">
+                </div>
+                <div class="form-group">
+                  <label for="n">Nitrogen (N) mg/kg</label>
+                  <input type="number" id="n" class="form-control" value="80">
+                </div>
+                <div class="form-group">
+                  <label for="p">Phosphorus (P) mg/kg</label>
+                  <input type="number" id="p" class="form-control" value="45">
+                </div>
+                <div class="form-group">
+                  <label for="k">Potassium (K) mg/kg</label>
+                  <input type="number" id="k" class="form-control" value="40">
+                </div>
+                <div class="form-group">
+                  <label for="moist">Soil Moisture %</label>
+                  <input type="number" id="moist" class="form-control" value="65">
+                </div>
+                <div class="form-group">
+                  <label for="temp">Avg Temp (°C)</label>
+                  <input type="number" id="temp" class="form-control" value="26">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="rain">Avg Annual Rainfall (mm)</label>
+                <input type="number" id="rain" class="form-control" value="180">
+              </div>
+              <button type="button" id="getRec" class="btn-primary" style="width: 100%;">Calculate Best Crop</button>
+            </form>
+          </div>
+          
+          <!-- Recommendation Outputs -->
+          <div class="glass-card" id="cropResultCard">
+            <h3 class="card-title">💡 Advisory Assessment</h3>
+            <div id="cropFallbackContent">
+              <div style="text-align: center; padding: 3rem 0; color: var(--color-text-muted);">
+                <span style="font-size: 3rem;">🌾</span>
+                <p style="margin-top: 1rem; font-weight: 500;">Provide soil parameters and click "Calculate Best Crop" to run the Random Forest model.</p>
+              </div>
+            </div>
+            
+            <div id="cropActiveContent" class="hidden">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                  <h4 style="font-size: 0.85rem; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px;">Recommended Crop</h4>
+                  <h2 id="recommendedCropName" style="font-size: 2.25rem; font-weight: 800; color: var(--accent);">Rice</h2>
+                </div>
+                <div style="text-align: right;">
+                  <span id="cropConfidence" style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--primary); padding: 0.35rem 0.85rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 700; color: var(--primary);">97.4% Match</span>
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;" id="recommendationSource">Source: Model</div>
+                </div>
+              </div>
+              
+              <div class="grid-2" style="margin-bottom: 1.5rem;">
+                <div>
+                  <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">NPK Soil Deficit Balance Chart</h4>
+                  <div style="height: 150px; position: relative;">
+                    <canvas id="cropChart"></canvas>
+                  </div>
+                </div>
+                <div>
+                  <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem;">Fertilizer Recommendation</h4>
+                  <ul id="fertilizerList" style="list-style: none; padding-left: 0; font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- Appended dynamically -->
+                  </ul>
+                </div>
+              </div>
+              
+              <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem; border-top: 1px solid var(--border-glass); padding-top: 1rem;">🗓️ Agricultural Sowing Calendar</h4>
+              <div id="cropTimelineList" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <!-- Appended dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: PLANT PATHOLOGY ==================== -->
+      <section id="tab-disease" class="tab-content">
+        <div class="grid-2">
+          
+          <!-- Image Upload & Webcam Simulator -->
+          <div class="glass-card" style="display: flex; flex-direction: column; align-items: center;">
+            <h3 class="card-title" style="align-self: flex-start; width: 100%;">🔍 Leaf Disease Scanner</h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; text-align: center; width: 100%;">
+              Take a leaf photo or upload an image file. Our AI scanner locates infected crop tissues and identifies pathogens.
+            </p>
+            
+            <div class="scanner-container">
+              <span id="placeholderText" style="color: var(--color-text-muted); font-size: 0.9rem; z-index: 5;">No Leaf Selected</span>
+              <img id="previewImage" class="hidden" style="width: 100%; height: 100%; object-fit: cover;" alt="Leaf preview"/>
+              <div id="scannerLaser" class="scanner-laser hidden"></div>
+              <canvas id="scannerCanvas" class="scanner-canvas"></canvas>
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; width: 100%;">
+              <label class="btn-accent" style="flex: 1; cursor: pointer; text-align: center;">
+                📁 Choose File
+                <input type="file" id="img" accept="image/*" style="display: none;"/>
+              </label>
+              <button type="button" id="send" class="btn-primary" style="flex: 1;">Run Pathology Scan</button>
+            </div>
+          </div>
+          
+          <!-- Diagnostic pathology report -->
+          <div class="glass-card" id="diseaseResultCard">
+            <h3 class="card-title">📋 Diagnostic Pathology Report</h3>
+            <div id="diseaseFallbackContent">
+              <div style="text-align: center; padding: 4rem 0; color: var(--color-text-muted);">
+                <span style="font-size: 3rem;">🔬</span>
+                <p style="margin-top: 1rem; font-weight: 500;">Select an image and click "Run Pathology Scan" to generate report.</p>
+              </div>
+            </div>
+            
+            <div id="diseaseActiveContent" class="hidden">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h4 id="diseaseName" style="font-size: 1.5rem; font-weight: 800; color: var(--danger);">Wheat Rust Disease</h4>
+                <span id="diseaseSeverity" style="background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 700; color: var(--danger);">Severity: High</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 1.25rem;" id="diseaseCause"></p>
+              
+              <div style="margin-bottom: 1.25rem;">
+                <h5 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--accent);">Symptoms Observed:</h5>
+                <ul id="diseaseSymptoms" style="padding-left: 1.25rem; font-size: 0.85rem; color: var(--color-text);">
+                  <!-- Appended -->
+                </ul>
+              </div>
+              
+              <div class="grid-2">
+                <div style="background: rgba(16, 185, 129, 0.05); padding: 1rem; border: 1px solid rgba(16, 185, 129, 0.1); border-radius: 0.75rem;">
+                  <h5 style="font-size: 0.9rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">Organic Remedies</h5>
+                  <ul id="diseaseOrganic" style="padding-left: 1.25rem; font-size: 0.8rem; color: var(--color-text-muted);">
+                    <!-- Appended -->
+                  </ul>
+                </div>
+                <div style="background: rgba(239, 68, 68, 0.05); padding: 1rem; border: 1px solid rgba(239, 68, 68, 0.1); border-radius: 0.75rem;">
+                  <h5 style="font-size: 0.9rem; font-weight: 700; color: var(--danger); margin-bottom: 0.5rem;">Chemical Interventions</h5>
+                  <ul id="diseaseChemical" style="padding-left: 1.25rem; font-size: 0.8rem; color: var(--color-text-muted);">
+                    <!-- Appended -->
+                  </ul>
+                </div>
+              </div>
+              
+              <div style="font-size: 0.75rem; color: var(--color-text-muted); text-align: right; margin-top: 1.5rem;" id="diseaseReportSource"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: CHATBOT ==================== -->
+      <section id="tab-chatbot" class="tab-content">
+        <div class="glass-card">
+          <h3 class="card-title">🤖 AgriSetu Conversational Assistant</h3>
+          <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+            Ask questions about crop diseases, fertilizers, planting seasons, or markets in English, Hindi, or Telugu. Tap the mic to speak!
+          </p>
+          
+          <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-bubble bot">
+                Namaste! I am AgriSetu AI. How can I help you with your fields today?
+              </div>
+            </div>
+            
+            <div class="chat-input-area">
+              <button type="button" id="micBtn" class="mic-btn">🎙️ Speak</button>
+              <input type="text" id="chatInput" class="form-control" style="flex-grow: 1;" placeholder="Ask about crop planting or leaf diseases...">
+              <button type="button" id="chatSend" class="btn-primary">Send</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: MARKET & BUYERS ==================== -->
+      <section id="tab-market" class="tab-content">
+        <div class="grid-1-2">
+          
+          <!-- Buyers and Markets list -->
+          <div class="glass-card" style="display: flex; flex-direction: column; height: 100%;">
+            <h3 class="card-title">🏢 Nearby Grain Buyers</h3>
+            
+            <!-- Collapsible Sale Offer Form -->
+            <details style="margin-bottom: 1.25rem; border: 1px solid var(--border-glass); border-radius: 0.75rem; padding: 0.75rem; background: rgba(0,0,0,0.15);">
+              <summary style="font-weight: 700; color: var(--accent); cursor: pointer; outline: none; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                <span>📢 List Your Crop For Sale</span>
+                <span style="font-size: 0.8rem;">▼</span>
+              </summary>
+              <form id="saleListingForm" style="margin-top: 0.75rem;" onsubmit="event.preventDefault();">
+                <div class="grid-2">
+                  <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="saleCrop" style="margin-bottom: 0.25rem; font-size: 0.8rem;">Crop Variety</label>
+                    <select id="saleCrop" class="form-control" style="background: var(--bg-primary); padding: 0.5rem; font-size: 0.85rem; border-radius: 0.5rem;">
+                      <option value="Rice">Rice</option>
+                      <option value="Wheat">Wheat</option>
+                      <option value="Maize">Maize</option>
+                      <option value="Cotton">Cotton</option>
+                      <option value="Sugarcane">Sugarcane</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="saleQty" style="margin-bottom: 0.25rem; font-size: 0.8rem;">Qty (Qtl)</label>
+                    <input type="number" id="saleQty" class="form-control" value="30" style="padding: 0.5rem; font-size: 0.85rem; border-radius: 0.5rem;">
+                  </div>
+                </div>
+                <div class="grid-2">
+                  <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="salePrice" style="margin-bottom: 0.25rem; font-size: 0.8rem;">Your Price (₹/Qtl)</label>
+                    <input type="number" id="salePrice" class="form-control" value="2300" style="padding: 0.5rem; font-size: 0.85rem; border-radius: 0.5rem;">
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0.75rem;">
+                    <label for="salePhone" style="margin-bottom: 0.25rem; font-size: 0.8rem;">Contact Phone</label>
+                    <input type="tel" id="salePhone" class="form-control" placeholder="+91..." style="padding: 0.5rem; font-size: 0.85rem; border-radius: 0.5rem;">
+                  </div>
+                </div>
+                <button type="button" id="submitSaleBtn" class="btn-primary" style="width: 100%; font-size: 0.8rem; padding: 0.5rem; border-radius: 0.5rem;">Publish Sale Offer</button>
+              </form>
+            </details>
+            
+            <div class="form-group">
+              <label for="cropSearch">Filter by Crop</label>
+              <input type="text" id="cropSearch" class="form-control" placeholder="e.g. Wheat, Rice...">
+            </div>
+            
+            <div id="buyers-list" style="flex-grow: 1; overflow-y: auto; max-height: 380px; padding-right: 0.5rem;">
+              <!-- Appended -->
+            </div>
+          </div>
+          
+          <!-- Live Interactive Map -->
+          <div class="glass-card" style="display: flex; flex-direction: column; height: 100%;">
+            <h3 class="card-title">🗺️ Geo-Spatial Market Connections</h3>
+            <div id="map" class="map-layout"></div>
+            
+            <div style="margin-top: 1.5rem;" id="marketAnalysisCard">
+              <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--accent);">Seasonal Price Trends</h4>
+              <div style="height: 180px; position: relative;">
+                <canvas id="marketChart"></canvas>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 1rem;" id="marketAdvisoryText"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: BLOCKCHAIN TRACEABILITY ==================== -->
+      <section id="tab-trace" class="tab-content">
+        <div class="grid-2">
+          
+          <!-- Minting certificate form -->
+          <div class="glass-card">
+            <h3 class="card-title">⛓️ Register Traceable Harvest</h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+              Secure your supply chain. Upload crop lot details to the blockchain. Mint a cryptographic origin block to prove organic and geographical validity to bulk buyers.
+            </p>
+            
+            <form id="traceForm" onsubmit="event.preventDefault();">
+              <div class="form-group">
+                <label for="traceFarmerName">Registered Farmer Name</label>
+                <input type="text" id="traceFarmerName" class="form-control" placeholder="Farmer Name">
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label for="traceCrop">Crop Variety</label>
+                  <select id="traceCrop" class="form-control" style="background: rgba(10, 20, 15, 0.8);">
+                    <option value="Rice">Rice</option>
+                    <option value="Wheat">Wheat</option>
+                    <option value="Maize">Maize</option>
+                    <option value="Cotton">Cotton</option>
+                    <option value="Sugarcane">Sugarcane</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="traceQty">Lot Quantity (Quintals)</label>
+                  <input type="number" id="traceQty" class="form-control" value="50">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="traceLocation">Farm Geo-Location</label>
+                <input type="text" id="traceLocation" class="form-control" placeholder="Village, State">
+              </div>
+              <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="traceOrganic" style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="traceOrganic" style="margin-bottom: 0; cursor: pointer;">Verified Organic Cultivation</label>
+              </div>
+              
+              <button type="button" id="mintBtn" class="btn-primary" style="width: 100%;">🔒 Mint Cryptographic Block</button>
+            </form>
+          </div>
+          
+          <!-- Real-Time Block Explorer Feed -->
+          <div class="glass-card" style="display: flex; flex-direction: column; height: 100%;">
+            <h3 class="card-title">🧱 Live Blockchain Block Explorer</h3>
+            <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.25rem;">
+              Verified, un-alterable blocks containing farm-to-fork digital certificates.
+            </p>
+            <div class="ledger-view">
+              <div class="blockchain-lane" id="blockchainLane">
+                <!-- Appended blocks -->
+              </div>
+            </div>
+          </div>
+        </div>
+      
+      <!-- Certificate Popup Modal -->
+        <div id="certificateModal" class="hidden" style="position: fixed; inset: 0; bg-color: rgba(0,0,0,0.85); background: rgba(5, 10, 8, 0.85); display: flex; align-items: center; justify-content: center; z-index: 500;">
+          <div class="glass-card" style="max-width: 500px; width: 90%; background: var(--bg-secondary); border: 2px solid var(--accent); position: relative; padding: 2rem;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+              <span style="font-size: 3rem;">📜</span>
+              <h3 style="color: var(--accent); font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;">AgriSetu Traceability Certificate</h3>
+              <p style="font-size: 0.75rem; color: var(--color-text-muted); text-transform: uppercase;">Blockchain Origin Registry</p>
+            </div>
+            
+            <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; border: 1px dashed var(--border-glass); padding: 1rem; border-radius: 0.5rem; background: rgba(0,0,0,0.2);">
+              <div><strong>Farmer:</strong> <span id="certFarmer"></span></div>
+              <div><strong>Crop Type:</strong> <span id="certCrop"></span></div>
+              <div><strong>Quantity:</strong> <span id="certQty"></span> Quintals</div>
+              <div><strong>Origin Location:</strong> <span id="certLoc"></span></div>
+              <div><strong>Organic Certified:</strong> <span id="certOrganic"></span></div>
+              <div><strong>Timestamp:</strong> <span id="certTime"></span></div>
+              <div style="font-size: 0.75rem; word-break: break-all; margin-top: 0.5rem;"><strong>Tx Hash:</strong> <span id="certHash" style="color: var(--color-text-muted); font-family: monospace;"></span></div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+              <!-- Simulated QR Code -->
+              <div id="qrcode" style="background: white; padding: 0.75rem; border-radius: 0.5rem; display: inline-block;">
+                <img id="certQR" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=AgriSetuVerification" alt="Verification QR Code"/>
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+              <button class="btn-primary" onclick="window.print()" style="flex: 1;">Print</button>
+              <button class="btn-accent" id="closeCertModal" style="flex: 1;">Close</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: WEATHER UPDATES ==================== -->
+      <section id="tab-weather" class="tab-content">
+        <div class="glass-card weather-container-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); margin-bottom: 0;">🌤️ Localized Microclimate Weather Updates</h3>
+            <button type="button" id="refreshWeatherBtn" class="btn-accent" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; border-radius: 0.5rem;">🔄 Refresh Weather</button>
+          </div>
+          <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Localized microclimate forecast. Integrated directly with open meteorological telemetry sensors to provide real-time agricultural advisories.
+          </p>
+          
+          <div class="weather-dashboard-layout">
+            <!-- Left telemetry metrics -->
+            <div class="weather-info-main">
+              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <span style="font-size: 1.25rem;">📍</span>
+                <span id="weatherLocationName" style="font-weight: 700; font-size: 1rem; color: var(--accent);">Detecting Coordinates...</span>
+              </div>
+              
+              <div class="weather-temp-block" style="display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem;">
+                <span id="weatherTemp" style="font-size: 3.5rem; font-weight: 800; color: var(--color-text); line-height: 1;">--°C</span>
+                <span id="weatherCondition" style="background: rgba(16, 185, 129, 0.12); border: 1px solid var(--primary); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 700; color: var(--primary);">Loading...</span>
+              </div>
+              
+              <div class="weather-details-grid">
+                <div class="weather-detail-item" style="background: rgba(10, 20, 15, 0.4); border: 1px solid var(--border-glass); padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">💧</span>
+                  <div>
+                    <div id="weatherHumidity" style="font-weight: 800; font-size: 1.15rem; color: var(--color-text);">--%</div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Humidity</div>
+                  </div>
+                </div>
+                <div class="weather-detail-item" style="background: rgba(10, 20, 15, 0.4); border: 1px solid var(--border-glass); padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">💨</span>
+                  <div>
+                    <div id="weatherWind" style="font-weight: 800; font-size: 1.15rem; color: var(--color-text);">-- km/h</div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Wind Speed</div>
+                  </div>
+                </div>
+                <div class="weather-detail-item" style="background: rgba(10, 20, 15, 0.4); border: 1px solid var(--border-glass); padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">☔</span>
+                  <div>
+                    <div id="weatherRain" style="font-weight: 800; font-size: 1.15rem; color: var(--color-text);">-- mm</div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Rainfall Today</div>
+                  </div>
+                </div>
+                <div class="weather-detail-item" style="background: rgba(10, 20, 15, 0.4); border: 1px solid var(--border-glass); padding: 0.75rem 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.5rem;">🌡️</span>
+                  <div>
+                    <div id="weatherFeelsLike" style="font-weight: 800; font-size: 1.15rem; color: var(--color-text);">--°C</div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);">Feels Like</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right Animated visual status box -->
+            <div class="weather-art-panel" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.25); border: 1px dashed var(--border-glass); border-radius: 1rem; padding: 1.5rem; min-height: 200px;">
+              <div id="weatherVisualBox" style="height: 100px; display: flex; align-items: center; justify-content: center; position: relative; width: 100%;">
+                <!-- Dynamic animation node injected here -->
+              </div>
+              <div id="weatherAdvisory" style="margin-top: 1rem; font-size: 0.8rem; text-align: center; color: var(--accent); font-weight: 600; line-height: 1.4; border-top: 1px solid var(--border-glass); padding-top: 0.75rem; width: 100%;">
+                Loading dynamic agricultural advisory...
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==================== TAB: COMMUNITY FORUM ==================== -->
+      <section id="tab-forum" class="tab-content">
+        <div class="grid-1-2">
+          
+          <!-- Left Column widgets -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Forum discussion creator -->
+            <div class="glass-card" style="margin-bottom: 0;">
+              <h3 class="card-title">➕ Create Post</h3>
+              <form id="forumForm" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                  <label for="postTitle">Topic Title</label>
+                  <input type="text" id="postTitle" class="form-control" placeholder="e.g. Tips for protecting wheat from yellow rust">
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label for="postAuthor">Author Nickname</label>
+                    <input type="text" id="postAuthor" class="form-control" placeholder="Farmer Name">
+                  </div>
+                  <div class="form-group">
+                    <label for="postCategory">Category</label>
+                    <select id="postCategory" class="form-control" style="background: rgba(10, 20, 15, 0.8);">
+                      <option value="Soil Health">Soil Health</option>
+                      <option value="Pest Control">Pest Control</option>
+                      <option value="Seeds & Sowing">Seeds & Sowing</option>
+                      <option value="Crop Selling">Crop Selling</option>
+                      <option value="General">General</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="postBody">Message Details</label>
+                  <textarea id="postBody" class="form-control" rows="4" placeholder="Share your experience or ask a question to local farmers..."></textarea>
+                </div>
+                
+                <!-- Crop Image Upload field -->
+                <div class="form-group">
+                  <label for="postImage">Upload Crop Image (Optional)</label>
+                  <input type="file" id="postImage" accept="image/*" class="form-control" style="padding: 0.5rem; font-size: 0.85rem; cursor: pointer; background: rgba(0, 0, 0, 0.2);">
+                </div>
+                
+                <button type="button" id="submitPost" class="btn-primary" style="width: 100%;">Publish Thread</button>
+              </form>
+            </div>
+
+            <!-- Reddit Trending Card widget -->
+            <div class="glass-card" style="margin-bottom: 0;">
+              <h3 class="card-title">🔥 Trending from Reddit</h3>
+              <p style="color: var(--color-text-muted); font-size: 0.8rem; margin-bottom: 1rem;">
+                Real-time discussions sourced from r/farming, r/agriculture, r/organicfarming, and r/gardening.
+              </p>
+              <div id="redditTrendingFeed" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 250px; overflow-y: auto; padding-right: 0.25rem;">
+                <div style="text-align: center; color: var(--color-text-muted); font-size: 0.8rem; padding: 1.5rem 0;">Synchronizing with Reddit API...</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Column: Forum Feed -->
+          <div class="glass-card" style="display: flex; flex-direction: column; height: 100%; margin-bottom: 0;">
+            <h3 class="card-title">🧑🌾 AgriSetu Farmer Posts</h3>
+            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn-accent filter-btn" data-category="" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem;">All</button>
+              <button class="btn-accent filter-btn" data-category="Soil Health" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem;">Soil</button>
+              <button class="btn-accent filter-btn" data-category="Pest Control" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem;">Pests</button>
+              <button class="btn-accent filter-btn" data-category="Seeds & Sowing" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem;">Seeds</button>
+              <button class="btn-accent filter-btn" data-category="Crop Selling" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem;">Marketing</button>
+            </div>
+            
+            <div id="forumThreads" style="flex-grow: 1; overflow-y: auto; max-height: 600px; display: flex; flex-direction: column; gap: 1.25rem; padding-right: 0.5rem;">
+              <!-- Appended dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- Floating Chatbot Widget -->
+  <div id="floatingChatWidget" style="position: fixed; bottom: 2rem; right: 2rem; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end;">
+    <!-- Chat Window (initially hidden) -->
+    <div id="floatingChatWindow" class="hidden" style="width: 320px; height: 400px; background: var(--bg-secondary); border: 2px solid var(--accent); border-radius: 1rem; box-shadow: 0 12px 40px rgba(0,0,0,0.6); display: flex; flex-direction: column; overflow: hidden; margin-bottom: 1rem; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, var(--bg-glass), rgba(16,185,129,0.2)); border-bottom: 1px solid var(--border-glass); padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.25rem;">🤖</span>
+          <div>
+            <div style="font-weight: 700; font-size: 0.85rem; color: var(--color-text);">AgriSetu AI</div>
+            <div style="font-size: 0.7rem; color: var(--primary); display: flex; align-items: center; gap: 0.25rem;"><span class="badge-dot" style="width: 6px; height: 6px; box-shadow: 0 0 4px var(--primary);"></span>Online</div>
+          </div>
+        </div>
+        <button id="closeFloatingChat" style="background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 1.15rem; font-weight: 700;">×</button>
+      </div>
+      <!-- Messages Container -->
+      <div id="floatingChatMessages" style="flex-grow: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; background: rgba(10, 18, 14, 0.95); font-size: 0.85rem;">
+        <div class="chat-bubble bot" style="max-width: 85%; padding: 0.65rem 0.95rem; font-size: 0.8rem; border-radius: 0.75rem; border-bottom-left-radius: 0.25rem; align-self: flex-start; background: var(--bg-secondary); border: 1px solid var(--border-glass); color: var(--color-text);">
+          Namaste! I am your floating AgriSetu Assistant. How can I help you today?
+        </div>
+      </div>
+      <!-- Input Area -->
+      <div style="display: flex; gap: 0.5rem; padding: 0.75rem; background: rgba(17, 29, 22, 0.95); border-top: 1px solid var(--border-glass);">
+        <button id="floatingMicBtn" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); color: var(--accent); padding: 0 0.5rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.9rem;">🎙️</button>
+        <input type="text" id="floatingChatInput" class="form-control" style="flex-grow: 1; padding: 0.5rem; font-size: 0.85rem; border-radius: 0.5rem; height: 32px;" placeholder="Ask me anything...">
+        <button id="floatingChatSend" class="btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem; border-radius: 0.5rem; height: 32px;">Send</button>
+      </div>
+    </div>
+    
+    <!-- Bubble Trigger Button (Animated Bot Avatar) -->
+    <button id="floatingChatBubble" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary)); border: 2px solid var(--primary); box-shadow: 0 8px 32px rgba(16, 185, 129, 0.35); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; overflow: visible; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+      <div class="floating-chat-radar"></div>
+      <div class="bot-avatar-animated">
+        <div class="bot-antenna">
+          <div class="bot-led"></div>
+        </div>
+        <div class="bot-head">
+          <div class="bot-ears"></div>
+          <div class="bot-eyes">
+            <div class="bot-eye left"></div>
+            <div class="bot-eye right"></div>
+          </div>
+          <div class="bot-mouth"></div>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- SPA Main Controllers -->
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/crop.js"></script>
+  <script type="module" src="js/disease.js"></script>
+  <script type="module" src="js/chatbot.js"></script>
+  <script type="module" src="js/map.js"></script>
+  <script type="module" src="js/forum.js"></script>
+</body>
+</html>
