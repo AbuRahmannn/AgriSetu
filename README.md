@@ -1,5 +1,8 @@
 # 🌱 AgriSetu — Smart Farmer Advisory & Community Hub
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg?style=for-the-badge&logo=github)](https://aburahmannn.github.io/AgriSetu/)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/AbuRahmannn/AgriSetu)
+
 AgriSetu is a premium, next-generation Web3 and AI-powered agricultural advisory platform designed to empower smallholder farmers. The system integrates real-time IoT field telemetry, machine-learning-based crop recommendations, computer-vision leaf pathology diagnostics, a localized microclimate weather advisor, an interactive spatial mandi market, a cryptographic supply chain registry, and a dynamic farming community forum integrated with Reddit APIs.
 
 Built with **HTML5, Vanilla CSS, Javascript (ES6), FastAPI, SQLite, and scikit-learn**, the application is optimized for speed, responsive design, and seamless user experiences.
